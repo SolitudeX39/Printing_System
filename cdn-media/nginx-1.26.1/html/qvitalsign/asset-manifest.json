@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/qvitalsign/static/css/main.4f52b108.css",
+    "main.js": "/qvitalsign/static/js/main.bee6e661.js",
+    "static/media/kasemrad bangkhae logo.jpg": "/qvitalsign/static/media/kasemrad bangkhae logo.f93a46f5dbf03c790ae6.jpg",
+    "static/media/reset.png": "/qvitalsign/static/media/reset.2d0f6fac658d8386584e.png",
+    "static/media/recall.png": "/qvitalsign/static/media/recall.f9638e058b6217518139.png",
+    "index.html": "/qvitalsign/index.html",
+    "main.4f52b108.css.map": "/qvitalsign/static/css/main.4f52b108.css.map",
+    "main.bee6e661.js.map": "/qvitalsign/static/js/main.bee6e661.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.4f52b108.css",
+    "static/js/main.bee6e661.js"
+  ]
+}
