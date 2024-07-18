@@ -1,16 +1,13 @@
 const snmp = require('net-snmp');
 const axios = require('axios');
 const express = require('express');
-const mysql = require('mssql');
+const { connectToDatabase } = require('./config/dbCon.js'); // Adjust the path as necessary
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // LINE Notify token
 const LINE_NOTIFY_TOKEN = "HjvhE48RR4VVGh1kJwxDcne4DbpeEBV0srAH2OaH5Jz";
-
-// Database connection
-const db = mysql.createConnection({host: "10.3.99.122", user: "devprt", password: "prt@1234", database: "PRT_Department"});
 
 // Function to get current hour
 function getCurrentHour() {
@@ -19,16 +16,16 @@ function getCurrentHour() {
 }
 
 // Function to query database
-function queryDatabase(callback) {
+async function queryDatabase() {
+    const pool = await connectToDatabase();
     const sql = "SELECT IP, COMMUNITY, LOCATION_NAME FROM PRINTERS";
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error("Database query error:", err);
-            callback(err, null);
-        } else {
-            callback(null, results);
-        }
-    });
+    try {
+        const result = await pool.request().query(sql);
+        return result.recordset;
+    } catch (err) {
+        console.error("Database query error:", err);
+        throw err;
+    }
 }
 
 // Function to send LINE Notify
@@ -54,9 +51,7 @@ function checkPrinterStatus(printer) {
         if (error) {
             console.error(error);
         } else {
-            const status = varbinds[0]
-                .value
-                .toString();
+            const status = varbinds[0].value.toString();
             console.log(`Printer ${printer.LOCATION_NAME} status: ${status}`);
 
             // Example condition for notifying (replace with actual logic)
@@ -70,19 +65,17 @@ function checkPrinterStatus(printer) {
 }
 
 // Main function to execute the process
-function executeProcess() {
+async function executeProcess() {
     const currentHour = getCurrentHour();
     if (currentHour >= 8 && currentHour <= 17) {
-        queryDatabase((err, printers) => {
-            if (err) {
-                console.error("Error fetching printer data:", err);
-                return;
-            }
-
+        try {
+            const printers = await queryDatabase();
             printers.forEach(printer => {
                 checkPrinterStatus(printer);
             });
-        });
+        } catch (err) {
+            console.error("Error fetching printer data:", err);
+        }
     } else {
         console.log("Outside working hours, skipping check.");
     }
