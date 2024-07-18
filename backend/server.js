@@ -1,7 +1,8 @@
+const sql = require('mssql');
 const snmp = require('net-snmp');
 const axios = require('axios');
 const express = require('express');
-const { connectToDatabase } = require('./config/dbCon.js'); // Adjust the path as necessary
+const cron = require('node-cron');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,23 +10,42 @@ const PORT = process.env.PORT || 3000;
 // LINE Notify token
 const LINE_NOTIFY_TOKEN = "HjvhE48RR4VVGh1kJwxDcne4DbpeEBV0srAH2OaH5Jz";
 
+// Database configuration
+const dbConfig = {
+    user: 'devprt',
+    password: 'prt@1234',
+    server: '10.3.99.122',
+    database: 'PRT_Management',
+    options: {
+        encrypt: true,
+        trustServerCertificate: true,
+    }
+};
+
+// Connect to the database
+const connectToDatabase = async () => {
+    try {
+        const pool = await sql.connect(dbConfig);
+        console.log('Connected to the database');
+        return pool;
+    } catch (err) {
+        console.error('Database connection error:', err);
+        throw err;
+    }
+};
+
 // Function to get current hour
 function getCurrentHour() {
     const now = new Date();
     return now.getHours();
 }
 
-// Function to query database
-async function queryDatabase() {
-    const pool = await connectToDatabase();
-    const sql = "SELECT IP, COMMUNITY, LOCATION_NAME FROM PRINTERS";
-    try {
-        const result = await pool.request().query(sql);
-        return result.recordset;
-    } catch (err) {
-        console.error("Database query error:", err);
-        throw err;
-    }
+// Function to query the database
+async function queryDatabase(pool) {
+    const request = pool.request();
+    const query = "SELECT IP, COMMUNITY, LOCATION_NAME FROM PRINTERS";
+    const result = await request.query(query);
+    return result.recordset;
 }
 
 // Function to send LINE Notify
@@ -69,7 +89,8 @@ async function executeProcess() {
     const currentHour = getCurrentHour();
     if (currentHour >= 8 && currentHour <= 17) {
         try {
-            const printers = await queryDatabase();
+            const pool = await connectToDatabase();
+            const printers = await queryDatabase(pool);
             printers.forEach(printer => {
                 checkPrinterStatus(printer);
             });
@@ -81,8 +102,10 @@ async function executeProcess() {
     }
 }
 
-// Schedule to run every 5 minutes
-setInterval(executeProcess, 5 * 60 * 1000);
+// Schedule the task to run every 5 minutes
+cron.schedule('*/5 * * * *', () => {
+    executeProcess();
+});
 
 // Start Express server
 app.listen(PORT, () => {
