@@ -1,17 +1,25 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-
-const app = express();
-const PORT = process.env.PORT || 8080;
-app.use(bodyParser.json());
+const sql = require('mssql');
 
 const dbConfig = {
-    user: 'bobby',
-    password: 'battlefield1234',
-    server: 'W06-CA-NR-003T',
-    database: 'Prototype',
+    user: 'devprt',
+    password: 'prt@1234',
+    server: '10.3.99.122',
+    database: 'PRT_Management',
     options: {
-        encrypt: true, // Use encryption
-        trustServerCertificate: true, // Trust server certificate
+        encrypt: true,
+        trustServerCertificate: true,
     }
 };
+
+const connectToDatabase = async () => {
+    try {
+        const pool = await sql.connect(dbConfig);
+        console.log('Connected to the database');
+        return pool;
+    } catch (err) {
+        console.error('Database connection error:', err);
+        throw err;
+    }
+};
+
+module.exports = { connectToDatabase };
