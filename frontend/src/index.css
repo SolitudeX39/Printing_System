@@ -12,14 +12,3 @@ body {
 code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
-
-
-@keyframes blink-animation {
-    0%,
-    100% {
-        color: white;
-    }
-    50% {
-        color: #FFF455;
-    }
-}

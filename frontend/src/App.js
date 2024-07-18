@@ -1,36 +1,43 @@
-// App.js
-
-import React, {Suspense, lazy} from 'react';
+import React from 'react';
+import {useMediaQuery} from 'react-responsive';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
-import QRCodeGenerator from './Components/QRGen';
+import './App.css';
 
-const CallPanel = lazy(() => import ('./Components/Call_Panel'));
-const QueueScreen = lazy(() => import ('./Components/Queue_Screen'));
-// const QRGen = lazy(() => import ('./Components/QRGen'));
-// Preload Online_Queue since it's essential for mobile functionality
-const OnlineQueue = lazy(() => import ('./Components/Online_Queue'));
-
-// Preload Online_Queue component
-const preloadOnlineQueue = () => import ('./Components/Online_Queue').then(module => module);
+import MobileLogin from './Components/MobileLogin';
+import DesktopLogin from './Components/DesktopLogin';
+import MainPage from './Components/MainPage';
+import Printers from './Components/Printers'; // Import Printers component
 
 function App() {
-    // Preload Online_Queue when App component mounts
-    React.useEffect(() => {
-        preloadOnlineQueue();
-    }, []);
+    const isMobile = useMediaQuery({maxWidth: 767});
 
     return (
         <Router>
-            <Suspense fallback={< div > Loading ...</div>}>
-                <Routes>
-                    <Route path="/qvs_lc1" element={< CallPanel />}/>
-                    <Route path="/qvs_lc1/queuescreen" element={< QueueScreen />}/>
-                    {/* <Route path="/qvs_lc1/online" element={< OnlineQueue />}/> */}
-                    {/* <Route path="/qvs_lc1/qr" element={< QRCodeGenerator />}/> */}
-                </Routes>
-            </Suspense>
+            <div className="App">
+                <header className="App-header">
+                    {isMobile
+                        ? <MobileRoutes/>
+                        : <DesktopRoutes/>}
+                </header>
+            </div>
         </Router>
     );
 }
+
+const MobileRoutes = () => (
+    <Routes>
+        <Route path="/" element={< MobileLogin />}/>
+        <Route path="/MainPage" element={< MainPage />}/>
+        <Route path="/printers" element={< Printers />}/> {/* Add Printers route */}
+    </Routes>
+);
+
+const DesktopRoutes = () => (
+    <Routes>
+        <Route path="/" element={< DesktopLogin />}/>
+        <Route path="/MainPage" element={< MainPage />}/>
+        <Route path="/printers" element={< Printers />}/> {/* Add Printers route */}
+    </Routes>
+);
 
 export default App;
