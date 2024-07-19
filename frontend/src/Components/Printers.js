@@ -2,20 +2,52 @@ import * as React from "react";
 import {Link} from "react-router-dom";
 import printer from "../Assets/printer.png";
 import settingsIcon from "../Assets/setting.png";
+import Swal from 'sweetalert2';
 
 function Printers() {
-    // State to manage which printer's overlay is active
     const [activePrinter,
         setActivePrinter] = React.useState(null);
 
-    // Function to handle clicking on the settings icon
     const handleSettingsClick = (printerNumber) => {
         setActivePrinter(printerNumber);
+        showSettingsAlert(printerNumber);
     };
 
-    // Function to close the overlay
     const handleCloseOverlay = () => {
         setActivePrinter(null);
+    };
+
+    const showSettingsAlert = (printerNumber) => {
+        Swal.fire({
+            title: `Printer ${printerNumber} Settings`,
+            html: `<input id="status-input" class="swal2-input" placeholder="Status">` + `<input id="location-input" class="swal2-input" placeholder="Location">` + `<input id="ip-input" class="swal2-input" placeholder="IP Address">` + `<input id="ink-input" class="swal2-input" placeholder="Ink Level">`,
+            showCancelButton: true,
+            confirmButtonText: 'Save Changes',
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                const status = document
+                    .getElementById('status-input')
+                    .value;
+                const location = document
+                    .getElementById('location-input')
+                    .value;
+                const ip = document
+                    .getElementById('ip-input')
+                    .value;
+                const ink = document
+                    .getElementById('ink-input')
+                    .value;
+                // You can handle saving the changes here (e.g., update state or make API calls)
+                console.log('Status:', status);
+                console.log('Location:', location);
+                console.log('IP Address:', ip);
+                console.log('Ink Level:', ink);
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                handleCloseOverlay(); // Close overlay if confirmed
+            }
+        });
     };
 
     return (
@@ -106,21 +138,6 @@ function Printers() {
                         <div className="mt-4 text-sm font-bold">Ink Level: 23%</div>
                     </div>
                 </div>
-
-                {/* Overlay for Settings */}
-                {activePrinter && (
-                    <div
-                        className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50"
-                        onClick={handleCloseOverlay}>
-                        <div className="bg-white p-4 rounded-lg shadow-lg">
-                            <div className="text-xl font-bold text-zinc-900">
-                                Printer {activePrinter}
-                                Settings
-                            </div>
-                            {/* Additional settings or details can be added here */}
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );

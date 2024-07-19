@@ -1,13 +1,33 @@
-require('dotenv').config();
 const snmp = require('net-snmp');
 const axios = require('axios');
-const {connectToDatabase} = require('./config/dbCon.js'); // Import the database configuration
+const express = require('express');
+const cron = require('node-cron');
+const {connectToDatabase} = require('./config/dbCon.js');
 
-// Environment variables
-const LINE_NOTIFY_TOKEN = process.env.LINE_NOTIFY_TOKEN;
-const OID = process.env.OID; // This should be the OID you want to monitor
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Function to send LINE Notify message
+// Middleware to parse JSON requests
+app.use(express.json());
+
+// LINE Notify token
+const LINE_NOTIFY_TOKEN = "HjvhE48RR4VVGh1kJwxDcne4DbpeEBV0srAH2OaH5Jz";
+
+// Function to get current hour
+function getCurrentHour() {
+    const now = new Date();
+    return now.getHours();
+}
+
+// Function to query the database
+async function queryDatabase(pool) {
+    const request = pool.request();
+    const query = "SELECT IP, COMMUNITY, LOCATION_NAME FROM PRINTERS";
+    const result = await request.query(query);
+    return result.recordset;
+}
+
+// Function to send LINE Notify
 function sendLineNotify(message) {
     axios.post('https://notify-api.line.me/api/notify', `message=${encodeURIComponent(message)}`, {
         headers: {
@@ -24,11 +44,11 @@ function sendLineNotify(message) {
 // Function to check printer status
 function checkPrinterStatus(printer) {
     const session = snmp.createSession(printer.IP, printer.COMMUNITY);
+    const oid = "1.3.6.1.2.1.43.11.1.1.9.1.1"; // Replace with actual OID
 
-    session.get([OID], (error, varbinds) => {
+    session.get([oid], (error, varbinds) => {
         if (error) {
-            console.error('SNMP error:', error);
-            sendLineNotify(`Error querying printer status: ${error.message}`);
+            console.error(error);
         } else {
             const status = varbinds[0]
                 .value
@@ -40,31 +60,80 @@ function checkPrinterStatus(printer) {
                 sendLineNotify(`Printer at ${printer.LOCATION_NAME} has an issue: ${status}`);
             }
         }
-        session.close();
     });
+
+    session.close();
 }
 
 // Main function to execute the process
 async function executeProcess() {
-    try {
-        const dbPool = await connectToDatabase();
-        const query = "SELECT IP, COMMUNITY, LOCATION_NAME FROM PRINTERS";
-        const result = await dbPool
-            .request()
-            .query(query);
-        const printers = result.recordset;
-
-        printers.forEach(printer => {
-            checkPrinterStatus(printer);
-        });
-
-    } catch (error) {
-        console.error('Error during execution process:', error);
+    const currentHour = getCurrentHour();
+    if (currentHour >= 8 && currentHour <= 17) {
+        try {
+            const pool = await connectToDatabase();
+            const printers = await queryDatabase(pool);
+            printers.forEach(printer => {
+                checkPrinterStatus(printer);
+            });
+        } catch (err) {
+            console.error("Error fetching printer data:", err);
+        }
+    } else {
+        console.log("Outside working hours, skipping check.");
     }
 }
 
-// Schedule to run every 5 minutes
-setInterval(executeProcess, 5 * 60 * 1000);
+// Schedule the task to run every 5 minutes
+cron.schedule('*/5 * * * *', () => {
+    executeProcess();
+});
 
-// Start execution immediately on server start
-executeProcess();
+// API routes
+app.get('/connect', async(req, res) => {
+    try {
+        await connectToDatabase();
+        res.send('Connected to the database');
+    } catch (err) {
+        res
+            .status(500)
+            .send('Database connection error');
+    }
+});
+
+app.get('/query', async(req, res) => {
+    try {
+        const pool = await connectToDatabase();
+        const printers = await queryDatabase(pool);
+        res.json(printers);
+    } catch (err) {
+        res
+            .status(500)
+            .send('Error querying the database');
+    }
+});
+
+app.post('/notify', (req, res) => {
+    const message = req.body.message || 'Test notification';
+    sendLineNotify(message);
+    res.send('Notification sent');
+});
+
+app.post('/checkPrinter', (req, res) => {
+    const printer = {
+        IP: req.body.IP,
+        COMMUNITY: req.body.COMMUNITY,
+        LOCATION_NAME: req.body.LOCATION_NAME
+    };
+    checkPrinterStatus(printer);
+    res.send('Printer status check initiated');
+});
+
+app.get('/execute', (req, res) => {
+    executeProcess();
+    res.send('Process executed');
+});
+
+// Start Express server
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
