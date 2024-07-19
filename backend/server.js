@@ -1,38 +1,17 @@
-const sql = require('mssql');
 const snmp = require('net-snmp');
 const axios = require('axios');
 const express = require('express');
 const cron = require('node-cron');
+const { connectToDatabase } = require('./config/dbCon.js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware to parse JSON requests
+app.use(express.json());
+
 // LINE Notify token
 const LINE_NOTIFY_TOKEN = "HjvhE48RR4VVGh1kJwxDcne4DbpeEBV0srAH2OaH5Jz";
-
-// Database configuration
-const dbConfig = {
-    user: 'devprt',
-    password: 'prt@1234',
-    server: '10.3.99.122',
-    database: 'PRT_Management',
-    options: {
-        encrypt: true,
-        trustServerCertificate: true,
-    }
-};
-
-// Connect to the database
-const connectToDatabase = async () => {
-    try {
-        const pool = await sql.connect(dbConfig);
-        console.log('Connected to the database');
-        return pool;
-    } catch (err) {
-        console.error('Database connection error:', err);
-        throw err;
-    }
-};
 
 // Function to get current hour
 function getCurrentHour() {
@@ -105,6 +84,47 @@ async function executeProcess() {
 // Schedule the task to run every 5 minutes
 cron.schedule('*/5 * * * *', () => {
     executeProcess();
+});
+
+// API routes
+app.get('/connect', async (req, res) => {
+    try {
+        await connectToDatabase();
+        res.send('Connected to the database');
+    } catch (err) {
+        res.status(500).send('Database connection error');
+    }
+});
+
+app.get('/query', async (req, res) => {
+    try {
+        const pool = await connectToDatabase();
+        const printers = await queryDatabase(pool);
+        res.json(printers);
+    } catch (err) {
+        res.status(500).send('Error querying the database');
+    }
+});
+
+app.post('/notify', (req, res) => {
+    const message = req.body.message || 'Test notification';
+    sendLineNotify(message);
+    res.send('Notification sent');
+});
+
+app.post('/checkPrinter', (req, res) => {
+    const printer = {
+        IP: req.body.IP,
+        COMMUNITY: req.body.COMMUNITY,
+        LOCATION_NAME: req.body.LOCATION_NAME
+    };
+    checkPrinterStatus(printer);
+    res.send('Printer status check initiated');
+});
+
+app.get('/execute', (req, res) => {
+    executeProcess();
+    res.send('Process executed');
 });
 
 // Start Express server
