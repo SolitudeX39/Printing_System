@@ -3,10 +3,14 @@ import {Link} from "react-router-dom";
 import printer from "../Assets/printer.png";
 import settingsIcon from "../Assets/setting.png";
 import Swal from 'sweetalert2';
+import {motion} from "framer-motion";
+import {FiMenu} from "react-icons/fi"; // Make sure this import is correct
 
 function Printers() {
     const [activePrinter,
         setActivePrinter] = React.useState(null);
+    const [open,
+        setOpen] = React.useState(false);
 
     const handleSettingsClick = (printerNumber) => {
         setActivePrinter(printerNumber);
@@ -20,7 +24,12 @@ function Printers() {
     const showSettingsAlert = (printerNumber) => {
         Swal.fire({
             title: `Printer ${printerNumber} Settings`,
-            html: `<input id="status-input" class="swal2-input" placeholder="Status">` + `<input id="location-input" class="swal2-input" placeholder="Location">` + `<input id="ip-input" class="swal2-input" placeholder="IP Address">` + `<input id="ink-input" class="swal2-input" placeholder="Ink Level">`,
+            html: `
+                <input id="status-input" class="swal2-input" placeholder="Status">
+                <input id="location-input" class="swal2-input" placeholder="Location">
+                <input id="ip-input" class="swal2-input" placeholder="IP Address">
+                <input id="ink-input" class="swal2-input" placeholder="Ink Level">
+            `,
             showCancelButton: true,
             confirmButtonText: 'Save Changes',
             showLoaderOnConfirm: true,
@@ -37,7 +46,7 @@ function Printers() {
                 const ink = document
                     .getElementById('ink-input')
                     .value;
-                // You can handle saving the changes here (e.g., update state or make API calls)
+                // Handle saving the changes here (e.g., update state or make API calls)
                 console.log('Status:', status);
                 console.log('Location:', location);
                 console.log('IP Address:', ip);
@@ -63,23 +72,40 @@ function Printers() {
                         alt="Logo"/>
                     <div>Printer System</div>
                 </div>
-                <div className="flex space-x-4">
-                    <Link
-                        to="/"
-                        className="px-4 py-2 text-sm leading-6 whitespace-nowrap rounded-2xl bg-zinc-300">
-                        Home
-                    </Link>
-                    <Link
-                        to="/printers"
-                        className="px-4 py-2 text-sm leading-6 whitespace-nowrap rounded-2xl bg-zinc-300">
-                        Printers
-                    </Link>
-                    <Link
-                        to="/settings"
-                        className="px-4 py-2 text-sm leading-6 whitespace-nowrap rounded-2xl bg-zinc-300">
-                        Settings
-                    </Link>
-                    {/* Add other pages as needed */}
+                <div className="flex items-center">
+                    <motion.div
+                        animate={open
+                        ? "open"
+                        : "closed"}
+                        className="relative z-10">
+                        <button
+                            onClick={() => setOpen((pv) => !pv)}
+                            className="flex items-center justify-center p-2 rounded-md text-zinc-900 bg-zinc-300 hover:bg-zinc-400 transition-colors">
+                            <FiMenu className="text-xl"/>
+                        </button>
+
+                        <motion.ul
+                            initial={wrapperVariants.closed}
+                            variants={wrapperVariants}
+                            style={{
+                            originY: "top",
+                            translateX: "-50%"
+                        }}
+                            className="flex flex-col gap-2 p-2 rounded-lg bg-white shadow-xl absolute top-[120%] left-[50%] w-48 overflow-hidden z-20">
+                            <li
+                                className="flex items-center gap-2 w-full p-2 text-xs font-medium whitespace-nowrap rounded-md hover:bg-zinc-100 text-slate-700 hover:text-zinc-900 transition-colors cursor-pointer">
+                                <Link to="/" className="w-full">Home</Link>
+                            </li>
+                            <li
+                                className="flex items-center gap-2 w-full p-2 text-xs font-medium whitespace-nowrap rounded-md hover:bg-zinc-100 text-slate-700 hover:text-zinc-900 transition-colors cursor-pointer">
+                                <Link to="/printers" className="w-full">Printers</Link>
+                            </li>
+                            <li
+                                className="flex items-center gap-2 w-full p-2 text-xs font-medium whitespace-nowrap rounded-md hover:bg-zinc-100 text-slate-700 hover:text-zinc-900 transition-colors cursor-pointer">
+                                <Link to="/settings" className="w-full">Settings</Link>
+                            </li>
+                        </motion.ul>
+                    </motion.div>
                 </div>
             </nav>
 
@@ -142,5 +168,22 @@ function Printers() {
         </div>
     );
 }
+
+const wrapperVariants = {
+    open: {
+        scaleY: 1,
+        transition: {
+            when: "beforeChildren",
+            staggerChildren: 0.1
+        }
+    },
+    closed: {
+        scaleY: 0,
+        transition: {
+            when: "afterChildren",
+            staggerChildren: 0.1
+        }
+    }
+};
 
 export default Printers;
