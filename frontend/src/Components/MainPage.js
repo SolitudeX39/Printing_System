@@ -1,10 +1,67 @@
-import React from "react";
-import {Link} from "react-router-dom";
+import React, {useState} from "react";
+import {Link, useNavigate} from "react-router-dom";
 import printer from "../Assets/printer.png";
 import refresh from "../Assets/refresh.png";
 import sort from "../Assets/sort.png";
+import {motion} from "framer-motion";
+import {FiMenu} from "react-icons/fi";
+import Swal from 'sweetalert2';
+
+// Define animation variants
+const wrapperVariants = {
+    open: {
+        scaleY: 1,
+        transition: {
+            when: "beforeChildren",
+            staggerChildren: 0.1
+        }
+    },
+    closed: {
+        scaleY: 0,
+        transition: {
+            when: "afterChildren",
+            staggerChildren: 0.1
+        }
+    }
+};
+
+const iconVariants = {
+    open: {
+        rotate: 180
+    },
+    closed: {
+        rotate: 0
+    }
+};
 
 function MainPage() {
+    const [open,
+        setOpen] = useState(false);
+    const navigate = useNavigate(); // Hook to navigate programmatically
+
+    const handleLogout = () => {
+        Swal
+            .fire({
+            title: 'Are you sure you want to logout?',
+            text: "You will be redirected to the login page.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Logout',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                container: 'swal2-container',
+                popup: 'swal2-popup',
+                button: 'swal2-button'
+            }
+        })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with logout logic (e.g., clear session, redirect to login page)
+                    navigate('/'); // Update this path as per your routing setup
+                }
+            });
+    };
+
     return (
         <div className="flex flex-col w-full bg-white">
             {/* Navbar */}
@@ -18,14 +75,50 @@ function MainPage() {
                         alt="Logo"/>
                     <div>Printer System</div>
                 </div>
-                <div className="flex space-x-4">
-                    <Link
-                        to="/"
-                        className="px-4 py-2 text-sm leading-6 whitespace-nowrap rounded-2xl bg-zinc-300">Home</Link>
-                    <Link
-                        to="/printers"
-                        className="px-4 py-2 text-sm leading-6 whitespace-nowrap rounded-2xl bg-zinc-300">Printers</Link>
-                    {/* Add other pages as needed */}
+                <div className="relative">
+                    <motion.div
+                        animate={open
+                        ? "open"
+                        : "closed"}
+                        className="relative z-10">
+                        <button
+                            onClick={() => setOpen(prev => !prev)}
+                            className="flex items-center justify-center p-2 rounded-md text-zinc-900 bg-zinc-300 hover:bg-zinc-400 transition-colors">
+                            <motion.span variants={iconVariants}>
+                                <FiMenu className="text-xl"/>
+                            </motion.span>
+                        </button>
+
+                        <motion.ul
+                            initial="closed"
+                            animate={open
+                            ? "open"
+                            : "closed"}
+                            variants={wrapperVariants}
+                            style={{
+                            originY: "top",
+                            translateX: "-50%"
+                        }}
+                            className="absolute top-[120%] left-[50%] w-48 flex flex-col gap-2 p-2 rounded-lg bg-white shadow-xl overflow-hidden z-20">
+                            <li
+                                className="flex items-center gap-2 w-full p-2 text-xs font-medium whitespace-nowrap rounded-md hover:bg-zinc-100 text-slate-700 hover:text-zinc-900 transition-colors cursor-pointer">
+                                <Link to="/mainpage" className="w-full">🏠 Home</Link>
+                            </li>
+                            <li
+                                className="flex items-center gap-2 w-full p-2 text-xs font-medium whitespace-nowrap rounded-md hover:bg-zinc-100 text-slate-700 hover:text-zinc-900 transition-colors cursor-pointer">
+                                <Link to="/printers" className="w-full">🖨️ Printers</Link>
+                            </li>
+                            <li
+                                className="flex items-center gap-2 w-full p-2 text-xs font-medium whitespace-nowrap rounded-md hover:bg-zinc-100 text-slate-700 hover:text-zinc-900 transition-colors cursor-pointer">
+                                <Link to="/settings" className="w-full">⚙️ Settings</Link>
+                            </li>
+                            <li
+                                className="flex items-center gap-2 w-full p-2 text-xs font-medium whitespace-nowrap rounded-md hover:bg-zinc-100 text-slate-700 hover:text-zinc-900 transition-colors cursor-pointer"
+                                onClick={handleLogout}>
+                                <span className="w-full">🚪 Logout</span>
+                            </li>
+                        </motion.ul>
+                    </motion.div>
                 </div>
             </nav>
 
@@ -47,10 +140,13 @@ function MainPage() {
 
                 {/* Input Box */}
                 <div className="flex justify-center">
-                    <input type="text" style={{
+                    <input
+                        type="text"
+                        style={{
                         width: "500px"
-                    }} // Adjust the width value as needed
-                        className="py-3 bg-white rounded border border-solid border-neutral-300 text-zinc-900 px-3" placeholder="Input text"/>
+                    }}
+                        className="py-3 bg-white rounded border border-solid border-neutral-300 text-zinc-900 px-3"
+                        placeholder="Input text"/>
                 </div>
 
                 {/* Refresh and Sort */}
@@ -73,7 +169,7 @@ function MainPage() {
                                 <option value="option2">Sort By Option 2</option>
                                 <option value="option3">Sort By Option 3</option>
                             </select>
-                        </div>  
+                        </div>
                     </div>
                 </div>
 

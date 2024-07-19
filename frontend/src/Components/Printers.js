@@ -1,16 +1,30 @@
 import * as React from "react";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import printer from "../Assets/printer.png";
 import settingsIcon from "../Assets/setting.png";
 import Swal from 'sweetalert2';
 import {motion} from "framer-motion";
-import {FiMenu} from "react-icons/fi"; // Make sure this import is correct
+import {FiMenu} from "react-icons/fi";
 
 function Printers() {
     const [activePrinter,
         setActivePrinter] = React.useState(null);
     const [open,
         setOpen] = React.useState(false);
+    const navigate = useNavigate(); // Hook to navigate programmatically
+
+    React.useEffect(() => {
+        if (open) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+
+        // Clean up the effect
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [open]);
 
     const handleSettingsClick = (printerNumber) => {
         setActivePrinter(printerNumber);
@@ -19,6 +33,30 @@ function Printers() {
 
     const handleCloseOverlay = () => {
         setActivePrinter(null);
+    };
+
+    const handleLogout = () => {
+        Swal
+            .fire({
+            title: 'Are you sure you want to logout?',
+            text: "You will be redirected to the login page.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Logout',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                container: 'swal2-container',
+                popup: 'swal2-popup',
+                button: 'swal2-button'
+            }
+        })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with logout logic (e.g., clear session, redirect to login page)
+                    // Redirect to login page or perform logout action
+                    navigate('/'); // Update this path as per your routing setup
+                }
+            });
     };
 
     const showSettingsAlert = (printerNumber) => {
@@ -33,6 +71,11 @@ function Printers() {
             showCancelButton: true,
             confirmButtonText: 'Save Changes',
             showLoaderOnConfirm: true,
+            customClass: {
+                container: 'swal2-container',
+                popup: 'swal2-popup',
+                input: 'swal2-input'
+            },
             preConfirm: () => {
                 const status = document
                     .getElementById('status-input')
@@ -46,7 +89,6 @@ function Printers() {
                 const ink = document
                     .getElementById('ink-input')
                     .value;
-                // Handle saving the changes here (e.g., update state or make API calls)
                 console.log('Status:', status);
                 console.log('Location:', location);
                 console.log('IP Address:', ip);
@@ -91,18 +133,25 @@ function Printers() {
                             originY: "top",
                             translateX: "-50%"
                         }}
-                            className="flex flex-col gap-2 p-2 rounded-lg bg-white shadow-xl absolute top-[120%] left-[50%] w-48 overflow-hidden z-20">
+                            className={`flex flex-col gap-2 p-2 rounded-lg bg-white shadow-xl absolute top-[120%] left-[50%] w-48 overflow-hidden z-20 ${open
+                            ? ''
+                            : 'hidden'}`}>
                             <li
                                 className="flex items-center gap-2 w-full p-2 text-xs font-medium whitespace-nowrap rounded-md hover:bg-zinc-100 text-slate-700 hover:text-zinc-900 transition-colors cursor-pointer">
-                                <Link to="/" className="w-full">Home</Link>
+                                <Link to="/mainpage" className="w-full">🏠 Home</Link>
                             </li>
                             <li
                                 className="flex items-center gap-2 w-full p-2 text-xs font-medium whitespace-nowrap rounded-md hover:bg-zinc-100 text-slate-700 hover:text-zinc-900 transition-colors cursor-pointer">
-                                <Link to="/printers" className="w-full">Printers</Link>
+                                <Link to="/printers" className="w-full">🖨️ Printers</Link>
                             </li>
                             <li
                                 className="flex items-center gap-2 w-full p-2 text-xs font-medium whitespace-nowrap rounded-md hover:bg-zinc-100 text-slate-700 hover:text-zinc-900 transition-colors cursor-pointer">
-                                <Link to="/settings" className="w-full">Settings</Link>
+                                <Link to="/settings" className="w-full">⚙️ Settings</Link>
+                            </li>
+                            <li
+                                className="flex items-center gap-2 w-full p-2 text-xs font-medium whitespace-nowrap rounded-md hover:bg-zinc-100 text-slate-700 hover:text-zinc-900 transition-colors cursor-pointer"
+                                onClick={handleLogout}>
+                                <span className="w-full">🚪 Logout</span>
                             </li>
                         </motion.ul>
                     </motion.div>
