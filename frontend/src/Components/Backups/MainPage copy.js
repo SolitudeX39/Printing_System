@@ -25,7 +25,6 @@ function MainPage() {
                     <Link
                         to="/printers"
                         className="px-4 py-2 text-sm leading-6 whitespace-nowrap rounded-2xl bg-zinc-300">Printers</Link>
-                    {/* Add other pages as needed */}
                 </div>
             </nav>
 
@@ -73,7 +72,7 @@ function MainPage() {
                                 <option value="option2">Sort By Option 2</option>
                                 <option value="option3">Sort By Option 3</option>
                             </select>
-                        </div>  
+                        </div>
                     </div>
                 </div>
 
