@@ -11,6 +11,7 @@ const dbConfig = {
     }
 };
 
+// Function to connect to the database
 const connectToDatabase = async () => {
     try {
         const pool = await sql.connect(dbConfig);

@@ -1,11 +1,14 @@
 const express = require('express');
-const router = express.Router();
 
-module.exports = (db) => {
+const defineRoutes = (db, sendLineNotify) => {
+    const router = express.Router();
+
     // Route to get toner levels
-    router.get('/toner-levels', async (req, res) => {
+    router.get('/toner', async(req, res) => {
         try {
-            const result = await db.request().query(`
+            const result = await db
+                .request()
+                .query(`
                 SELECT TOP (1000) [PRT_Global_Config_Type], [PRT_Global_Config_Value]
                 FROM [dbo].[PRT_Global_Configs]
                 WHERE [PRT_Global_Config_Type] = 'Toner_Level'
@@ -13,14 +16,18 @@ module.exports = (db) => {
             res.json(result.recordset); // Send the query result as JSON response
         } catch (err) {
             console.error('Database query error:', err);
-            res.status(500).send('Database query error');
+            res
+                .status(500)
+                .send('Database query error');
         }
     });
 
     // Route to get department printer status
-    router.get('/department-printers', async (req, res) => {
-        try {   
-            const result = await db.request().query(`
+    router.get('/department', async(req, res) => {
+        try {
+            const result = await db
+                .request()
+                .query(`
                 SELECT TOP (1000) [PRT_DIGIT]
                     ,[PRT_FLOOR]
                     ,[PRT_IP]
@@ -35,9 +42,20 @@ module.exports = (db) => {
             res.json(result.recordset); // Send the query result as JSON response
         } catch (err) {
             console.error('Database query error:', err);
-            res.status(500).send('Database query error');
+            res
+                .status(500)
+                .send('Database query error');
         }
+    });
+
+    // Route to send LINE Notify
+    router.post('/notify', (req, res) => {
+        const message = req.body.message || 'Test notification';
+        sendLineNotify(message);
+        res.send('Notification sent');
     });
 
     return router;
 };
+
+module.exports = defineRoutes;
