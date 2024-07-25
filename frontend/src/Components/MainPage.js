@@ -25,15 +25,6 @@ const wrapperVariants = {
     }
 };
 
-const iconVariants = {
-    open: {
-        rotate: 180
-    },
-    closed: {
-        rotate: 0
-    }
-};
-
 function MainPage() {
     const [open,
         setOpen] = useState(false);

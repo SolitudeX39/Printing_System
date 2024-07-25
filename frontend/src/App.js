@@ -1,43 +1,23 @@
 import React from 'react';
-import {useMediaQuery} from 'react-responsive';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import './App.css';
 
-import MobileLogin from './Components/MobileLogin';
-import DesktopLogin from './Components/DesktopLogin';
 import MainPage from './Components/MainPage';
-import Printers from './Components/Printers'; // Import Printers component
+import Printers from './Components/Printers';
+import Settings from './Components/Settings';
+import ResponsiveLogin from './Components/Login';
 
-function App() {
-    const isMobile = useMediaQuery({maxWidth: 767});
-
+const App = () => {
     return (
         <Router>
-            <div className="App">
-                <header className="App-header">
-                    {isMobile
-                        ? <MobileRoutes/>
-                        : <DesktopRoutes/>}
-                </header>
-            </div>
+            <Routes>
+                <Route path="/" element={< ResponsiveLogin />}/>
+                <Route path="/mainpage" element={< MainPage />}/>
+                <Route path="/printers" element={< Printers />}/>
+                <Route path="/settings" element={< Settings />}/>
+            </Routes>
         </Router>
     );
-}
-
-const MobileRoutes = () => (
-    <Routes>
-        <Route path="/" element={< MobileLogin />}/>
-        <Route path="/mainpage" element={< MainPage />}/>
-        <Route path="/printers" element={< Printers />}/> {/* Add Printers route */}
-    </Routes>
-);
-
-const DesktopRoutes = () => (
-    <Routes>
-        <Route path="/" element={< DesktopLogin />}/>
-        <Route path="/mainpage" element={< MainPage />}/>
-        <Route path="/printers" element={< Printers />}/> {/* Add Printers route */}
-    </Routes>
-);
+};
 
 export default App;
