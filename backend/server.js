@@ -2,11 +2,11 @@ const express = require('express');
 const snmp = require('net-snmp');
 const axios = require('axios');
 const cron = require('node-cron');
-const { connectToDatabase } = require('./config/dbCon.js');
+
 const defineRoutes = require('./routes.js');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware to parse JSON requests
 app.use(express.json());
@@ -39,18 +39,26 @@ cron.schedule('*/5 * * * *', () => {
     executeProcess();
 });
 
-// Connect to the database and define the routes
-connectToDatabase()
-    .then(db => {
-        const routes = defineRoutes(db, sendLineNotify);
-        app.use('/api', routes);
 
-        // Start the server
-        app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
-    })
-    .catch(err => {
-        console.error('Database connection error:', err);
-        process.exit(1);
-    });
+app.use('/api', defineRoutes);
+
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
+// Connect to the database and define the routes
+// connectToDatabase()
+//     .then(db => {
+//         const routes = defineRoutes(db, sendLineNotify);
+//         app.use('/api', routes);
+
+//         // Start the server
+//         app.listen(PORT, () => {
+//             console.log(`Server is running on port ${PORT}`);
+//         });
+//     })
+//     .catch(err => {
+//         console.error('Database connection error:', err);
+//         process.exit(1);
+//     });
