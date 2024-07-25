@@ -1,40 +1,16 @@
-import React, {useState, useEffect} from 'react';
-import {useNavigate, useLocation} from 'react-router-dom';
+import React, {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import {useMediaQuery} from 'react-responsive';
 
 function MyComponent() {
     const navigate = useNavigate();
-    const location = useLocation();
     const isDesktop = useMediaQuery({query: '(min-width: 768px)'});
     const [selectedSetting,
         setSelectedSetting] = useState(null);
-    const [previousPage,
-        setPreviousPage] = useState(null);
-
-    useEffect(() => {
-        // Store the previous page before setting new one
-        if (location.state && location.state.from) {
-            setPreviousPage(location.state.from);
-        }
-    }, [location]);
 
     // Handle button click
     const handleButtonClick = (title, text) => {
         setSelectedSetting({title, text});
-    };
-
-    // Navigate back to the previous page
-    const handleBackButtonClick = () => {
-        if (previousPage) {
-            navigate(previousPage);
-        } else {
-            navigate(-1); // Fallback if no previous page is recorded
-        }
-    };
-
-    // Navigate back to the settings menu
-    const handleDetailBackButtonClick = () => {
-        setSelectedSetting(null);
     };
 
     return (
@@ -44,74 +20,60 @@ function MyComponent() {
                 ? (
                     <div className="flex flex-row w-full">
                         {/* Sidebar */}
-                        <div className="w-64 bg-gray-900 text-gray-200 p-4 flex flex-col">
+                        <div className="w-1/4 bg-white text-gray-900 rounded-lg p-4">
                             <button
-                                className="absolute top-4 left-4 text-blue-500 hover:underline text-sm font-bold"
-                                onClick={handleBackButtonClick}>
-                                &larr; Back
+                                className="block px-4 py-3 bg-gray-100 rounded-lg w-full text-left text-sm mb-2"
+                                onClick={() => handleButtonClick('Printer', 'Details about the Printer')}>
+                                Printer
                             </button>
-                            <div className="text-center text-xl font-bold mt-12 mb-6">
-                                Settings
-                            </div>
-                            <div className="flex flex-col space-y-2 w-full font-bold">
-                                <button
-                                    className="py-2 text-left text-sm"
-                                    onClick={() => handleButtonClick('Printer', 'Details about the Printer')}>
-                                    Printer
-                                </button>
-                                <button
-                                    className="py-2 text-left text-sm"
-                                    onClick={() => handleButtonClick('Office Status', 'Details about the Office status')}>
-                                    Office Status
-                                </button>
-                                <button
-                                    className="py-2 text-left text-sm"
-                                    onClick={() => handleButtonClick('General Settings', 'Details about General settings')}>
-                                    General Settings
-                                </button>
-                                <button
-                                    className="py-2 text-left text-sm"
-                                    onClick={() => handleButtonClick('Privacy Settings', 'Details about Privacy settings')}>
-                                    Privacy Settings
-                                </button>
-                                <button
-                                    className="py-2 text-left text-sm"
-                                    onClick={() => handleButtonClick('Notification Settings', 'Details about Notification settings')}>
-                                    Notification Settings
-                                </button>
-                                <button
-                                    className="py-2 text-left text-sm"
-                                    onClick={() => handleButtonClick('Appearance Settings', 'Details about Appearance settings')}>
-                                    Appearance Settings
-                                </button>
-                                <button
-                                    className="py-2 text-left text-sm"
-                                    onClick={() => handleButtonClick('Help & Support', 'Details about Help & Support')}>
-                                    Help & Support
-                                </button>
-                                <button
-                                    className="py-2 text-left text-sm"
-                                    onClick={() => handleButtonClick('Sign Out', 'Details about Sign out')}>
-                                    Sign Out
-                                </button>
-                            </div>
+                            <button
+                                className="block px-4 py-3 bg-gray-100 rounded-lg w-full text-left text-sm mb-2"
+                                onClick={() => handleButtonClick('Office Status', 'Details about the Office status')}>
+                                Office Status
+                            </button>
+                            <button
+                                className="block px-4 py-3 bg-gray-100 rounded-lg w-full text-left text-sm mb-2"
+                                onClick={() => handleButtonClick('General Settings', 'Details about General settings')}>
+                                General Settings
+                            </button>
+                            <button
+                                className="block px-4 py-3 bg-gray-100 rounded-lg w-full text-left text-sm mb-2"
+                                onClick={() => handleButtonClick('Privacy Settings', 'Details about Privacy settings')}>
+                                Privacy Settings
+                            </button>
+                            <button
+                                className="block px-4 py-3 bg-gray-100 rounded-lg w-full text-left text-sm mb-2"
+                                onClick={() => handleButtonClick('Notification Settings', 'Details about Notification settings')}>
+                                Notification Settings
+                            </button>
+                            <button
+                                className="block px-4 py-3 bg-gray-100 rounded-lg w-full text-left text-sm mb-2"
+                                onClick={() => handleButtonClick('Appearance Settings', 'Details about Appearance settings')}>
+                                Appearance Settings
+                            </button>
+                            <button
+                                className="block px-4 py-3 bg-gray-100 rounded-lg w-full text-left text-sm mb-2"
+                                onClick={() => handleButtonClick('Help & Support', 'Details about Help & Support')}>
+                                Help & Support
+                            </button>
+                            <button
+                                className="block px-4 py-3 bg-gray-100 rounded-lg w-full text-left text-sm mb-2"
+                                onClick={() => handleButtonClick('Sign Out', 'Details about Sign out')}>
+                                Sign Out
+                            </button>
                         </div>
                         {/* Details Panel */}
-                        <div className="flex-1 bg-white text-gray-900 p-8 relative">
+                        <div className="w-3/4 bg-white text-gray-900 rounded-lg p-8">
                             {selectedSetting
                                 ? (
                                     <div>
-                                        {isDesktop
-                                            ? null
-                                            : (
-                                                <button
-                                                    className="absolute top-4 left-4 text-blue-500 hover:underline text-xl font-bold"
-                                                    onClick={handleDetailBackButtonClick}>
-                                                    &lt;
-                                                </button>
-                                            )}
-                                        <h1 className="text-2xl font-bold mb-4 mt-8">{selectedSetting.title}</h1>
+                                        <h1 className="text-2xl font-bold mb-4">{selectedSetting.title}</h1>
                                         <p>{selectedSetting.text}</p>
+                                        <button
+                                            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
+                                            onClick={() => setSelectedSetting(null)}>
+                                            Back
+                                        </button>
                                     </div>
                                 )
                                 : (
@@ -131,8 +93,8 @@ function MyComponent() {
                             : 'translate-x-0'} z-10`}>
                             <button
                                 className="absolute top-4 left-4 text-blue-500 hover:underline text-sm"
-                                onClick={handleBackButtonClick}>
-                                &larr; Back to previous page
+                                onClick={() => setSelectedSetting(null)}>
+                                &larr; Back
                             </button>
                             <div className="flex flex-col items-center mt-12">
                                 <h1 className="text-2xl font-bold mb-4">Settings</h1>
@@ -186,13 +148,13 @@ function MyComponent() {
                             {selectedSetting
                                 ? (
                                     <div>
-                                        <button
-                                            className="absolute top-4 left-4 text-blue-500 hover:underline text-xl font-bold"
-                                            onClick={handleDetailBackButtonClick}>
-                                            &lt;
-                                        </button>
-                                        <h1 className="text-2xl font-bold mb-4 mt-8">{selectedSetting.title}</h1>
+                                        <h1 className="text-2xl font-bold mb-4">{selectedSetting.title}</h1>
                                         <p>{selectedSetting.text}</p>
+                                        <button
+                                            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
+                                            onClick={() => setSelectedSetting(null)}>
+                                            Back
+                                        </button>
                                     </div>
                                 )
                                 : (
