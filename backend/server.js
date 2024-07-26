@@ -12,6 +12,8 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());
 
 
+
+
 // LINE Notify token
 const LINE_NOTIFY_TOKEN = "HjvhE48RR4VVGh1kJwxDcne4DbpeEBV0srAH2OaH5Jz";
 const SOME_THRESHOLD = 20; 
@@ -30,30 +32,11 @@ function sendLineNotify(message) {
         console.error('Error sending notification:', error);
     });
 }
-async function scheduledTask() {
-    try {
-        const db = await connectToDatabase();
-        const result = await db.request().query(`
-            SELECT TOP (1000) [PRT_Global_Config_Type], [PRT_Global_Config_Value]
-            FROM [dbo].[PRT_Global_Configs]
-            WHERE [PRT_Global_Config_Type] = 'Toner_Level'
-        `);
-        console.log('Scheduled task result:', result.recordset);
 
-        // Example: Send a notification if a certain condition is met
-        result.recordset.forEach(record => {
-            if (record.PRT_Global_Config_Value < SOME_THRESHOLD) {
-                sendLineNotify(`Toner level is low: ${record.PRT_Global_Config_Value}`);
-            }
-        });
-    } catch (err) {
-        console.error('Scheduled task error:', err);
-    }
-}
+app.use('/api', defineRoutes);
 
-
-
-// Schedule the task to run every 5 minutes
-cron.schedule('*/5 * * * *', () => {
-    scheduledTask();
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
+
