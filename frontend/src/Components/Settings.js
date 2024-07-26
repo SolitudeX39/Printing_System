@@ -115,22 +115,22 @@ function MyComponent() {
                                 <button
                                     className={buttonClasses('General Settings')}
                                     onClick={() => handleButtonClick('General Settings', 'Details about General settings')}>
-                                    General Settings
+                                    General
                                 </button>
                                 <button
-                                    className={buttonClasses('Privacy Settings')}
-                                    onClick={() => handleButtonClick('Privacy Settings', 'Details about Privacy settings')}>
-                                    Privacy Settings
+                                    className={buttonClasses('Privacy & Security Settings')}
+                                    onClick={() => handleButtonClick('Privacy & Security Settings', 'Details about Privacy & Security Settings')}>
+                                    Privacy & Security
                                 </button>
                                 <button
                                     className={buttonClasses('Notification Settings')}
                                     onClick={() => handleButtonClick('Notification Settings', 'Details about Notification settings')}>
-                                    Notification Settings
+                                    Notification
                                 </button>
                                 <button
                                     className={buttonClasses('Appearance Settings')}
                                     onClick={() => handleButtonClick('Appearance Settings', 'Details about Appearance settings')}>
-                                    Appearance Settings
+                                    Appearance
                                 </button>
                                 <button
                                     className={buttonClasses('Help & Support')}
@@ -218,16 +218,16 @@ function MyComponent() {
                                     onClick={() => handleButtonClick('General Settings', 'Details about General settings')}>
                                     <div className="flex items-center space-x-4">
                                         <img src={generalSettings} alt="General Settings Icon" className="w-6 h-6"/>
-                                        <span>General Settings</span>
+                                        <span>General</span>
                                     </div>
                                     <img src={rightArrow} alt="Right Arrow" className="w-4 h-4"/>
                                 </button>
                                 <button
                                     className="px-4 py-3 bg-gray-100 rounded-lg w-full text-left text-sm mb-2 flex items-center space-x-4 justify-between"
-                                    onClick={() => handleButtonClick('Privacy Settings', 'Details about Privacy settings')}>
+                                    onClick={() => handleButtonClick('Privacy & Security Settings', 'Details about Privacy & Security Settings')}>
                                     <div className="flex items-center space-x-4">
                                         <img src={privacyIcon} alt="Privacy Settings Icon" className="w-6 h-6"/>
-                                        <span>Privacy Settings</span>
+                                        <span>Privacy & Security</span>
                                     </div>
                                     <img src={rightArrow} alt="Right Arrow" className="w-4 h-4"/>
                                 </button>
@@ -239,7 +239,7 @@ function MyComponent() {
                                             src={notificationIcon}
                                             alt="Notification Settings Icon"
                                             className="w-6 h-6"/>
-                                        <span>Notification Settings</span>
+                                        <span>Notification</span>
                                     </div>
                                     <img src={rightArrow} alt="Right Arrow" className="w-4 h-4"/>
                                 </button>
@@ -251,7 +251,7 @@ function MyComponent() {
                                             src={appearanceSettingsIcon}
                                             alt="Appearance Settings Icon"
                                             className="w-6 h-6"/>
-                                        <span>Appearance Settings</span>
+                                        <span>Appearance</span>
                                     </div>
                                     <img src={rightArrow} alt="Right Arrow" className="w-4 h-4"/>
                                 </button>

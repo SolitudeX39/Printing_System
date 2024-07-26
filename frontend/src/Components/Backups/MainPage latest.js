@@ -1,5 +1,6 @@
-import React, {useState} from "react";
+import React, {useState, useRef, useEffect} from "react";
 import {Link, useNavigate} from "react-router-dom";
+import {useMediaQuery} from 'react-responsive';
 import printer from "../Assets/printer.png";
 import refresh from "../Assets/refresh.png";
 import sort from "../Assets/sort.png";
@@ -25,24 +26,15 @@ const wrapperVariants = {
     }
 };
 
-const iconVariants = {
-    open: {
-        rotate: 180
-    },
-    closed: {
-        rotate: 0
-    }
-};
-
 function MainPage() {
     const [open,
         setOpen] = useState(false);
-    const navigate = useNavigate(); // Hook to navigate programmatically
-    const dropdownRef = React.useRef(null); // Ref for dropdown menu
+    const navigate = useNavigate();
+    const isDesktop = useMediaQuery({query: '(min-width: 768px)'});
+    const dropdownRef = useRef(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const handleClickOutside = (event) => {
-            console.log("Clicked outside:", event.target); // Debugging statement
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setOpen(false);
             }
@@ -55,20 +47,17 @@ function MainPage() {
         };
     }, []);
 
-    React.useEffect(() => {
-        if (open) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
-
+    useEffect(() => {
+        document.body.style.overflow = open
+            ? 'hidden'
+            : '';
         return () => {
             document.body.style.overflow = '';
         };
     }, [open]);
 
     const handleLogout = () => {
-        setOpen(false); // Close the dropdown menu
+        setOpen(false);
 
         Swal
             .fire({
@@ -86,7 +75,6 @@ function MainPage() {
         })
             .then((result) => {
                 if (result.isConfirmed) {
-                    // Proceed with logout logic (e.g., clear session, redirect to login page)
                     navigate('/'); // Update this path as per your routing setup
                 }
             });
@@ -101,21 +89,22 @@ function MainPage() {
                     <img
                         loading="lazy"
                         src={printer}
-                        className="shrink-0 self-start aspect-square w-6"
+                        className="shrink-0 w-6 aspect-square"
                         alt="Logo"/>
                     <div>Printer System</div>
                 </div>
                 <div className="flex items-center">
-                    <motion.div animate={open
+                    <motion.div
+                        animate={open
                         ? "open"
-                        : "closed"} className="relative z-10" ref={dropdownRef} // Attach the ref to the dropdown menu
-                    >
+                        : "closed"}
+                        className="relative z-10"
+                        ref={dropdownRef}>
                         <button
-                            onClick={() => setOpen((pv) => !pv)}
+                            onClick={() => setOpen((prev) => !prev)}
                             className="flex items-center justify-center p-2 rounded-md text-zinc-900 bg-zinc-300 hover:bg-zinc-400 transition-colors">
                             <FiMenu className="text-xl"/>
                         </button>
-
                         <motion.ul
                             initial={wrapperVariants.closed}
                             animate={open
@@ -159,7 +148,7 @@ function MainPage() {
                 {/* Filter Buttons */}
                 <div className="flex justify-center">
                     <div
-                        className="flex justify-center gap-3 sm:gap-5 text-sm leading-5 bg-neutral-300 rounded text-zinc-900">
+                        className="flex gap-3 sm:gap-5 text-sm leading-5 bg-neutral-300 rounded text-zinc-900">
                         <button className="px-3 py-2.5 rounded focus:outline-none focus:bg-gray-200">Critical</button>
                         <button className="px-3 py-2.5 rounded focus:outline-none focus:bg-gray-200">Warning</button>
                         <button className="px-3 py-2.5 rounded focus:outline-none focus:bg-gray-200">All</button>
@@ -172,7 +161,9 @@ function MainPage() {
                     <input
                         type="text"
                         style={{
-                        width: "500px"
+                        width: isDesktop
+                            ? "500px"
+                            : "100%"
                     }}
                         className="py-3 bg-white rounded border border-solid border-neutral-300 text-zinc-900 px-3"
                         placeholder="Input text"/>
@@ -182,17 +173,21 @@ function MainPage() {
                 <div className="flex justify-center">
                     <div className="flex items-center gap-3 sm:gap-5">
                         <div
-                            className="flex items-center gap-1.5 px-3 py-2.5 text-white whitespace-nowrap bg-cyan-500 rounded-md">
+                            className="flex items-center gap-1.5 px-3 py-2.5 text-white bg-cyan-500 rounded-md">
                             <img
                                 loading="lazy"
                                 src={refresh}
                                 className="shrink-0 w-4 aspect-square"
-                                alt=""/>
+                                alt="Refresh"/>
                             <button className="my-auto">Refresh</button>
                         </div>
                         <div
                             className="flex items-center gap-1.5 px-3.5 py-2.5 rounded border border-solid bg-black bg-opacity-0 border-neutral-300 text-zinc-900">
-                            <img loading="lazy" src={sort} className="shrink-0 w-4 aspect-square" alt=""/>
+                            <img
+                                loading="lazy"
+                                src={sort}
+                                className="shrink-0 w-4 aspect-square"
+                                alt="Sort"/>
                             <select className="flex-auto outline-none bg-transparent text-sm leading-5">
                                 <option value="option1">Sort By Option 1</option>
                                 <option value="option2">Sort By Option 2</option>
@@ -203,34 +198,77 @@ function MainPage() {
                 </div>
 
                 {/* Printer Status */}
-                <div className="flex flex-col gap-6 text-center">
-                    <div className="text-sm font-bold leading-5 text-zinc-900">Department: [Department Name]</div>
-                    <div className="text-sm leading-5">Last Refresh: [Date and Time]</div>
-                    <div className="flex flex-col gap-4">
-                        <div className="flex flex-col gap-3 p-3 bg-white rounded">
-                            <div className="text-sm font-bold leading-5 text-zinc-900">Printer A</div>
-                            <div>Status: Operational</div>
-                            <div>Location: 2nd Floor</div>
-                            <div className="flex justify-center">
-                                <div
-                                    className="px-2 py-1 text-cyan-500 bg-white rounded border border-cyan-500 border-solid">
-                                    Last Serviced: 2023-09-15
+                {isDesktop
+                    ? (
+                        <div className="flex flex-col gap-6 text-center">
+                            <div className="text-sm font-bold leading-5 text-zinc-900">Department: [Department Name]</div>
+                            <div className="text-sm leading-5">Last Refresh: [Date and Time]</div>
+
+                            {/* Container for Horizontal Scrolling */}
+                            <div className="overflow-x-auto">
+                                <div className="flex flex-nowrap items-center justify-center space-x-4">
+                                    {/* Printer Card 1 */}
+                                    <div className="flex-shrink-0 w-70 p-4 bg-gray-200 rounded-lg shadow-md">
+                                        <div className="text-sm font-bold leading-5 text-zinc-900">Printer 1</div>
+                                        <div>Status: Operational</div>
+                                        <div>Location: 2nd Floor</div>
+                                        <div className="flex justify-center mt-2">
+                                            <div
+                                                className="px-2 py-1 text-cyan-500 bg-white rounded border border-cyan-500 border-solid">
+                                                Last Serviced: 2023-09-15
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Printer Card 2 */}
+                                    <div className="flex-shrink-0 w-70 p-4 bg-gray-200 rounded-lg shadow-md">
+                                        <div className="text-sm font-bold leading-5 text-zinc-900">Printer 2</div>
+                                        <div>Status: Out of Ink</div>
+                                        <div>Location: 1st Floor</div>
+                                        <div className="flex justify-center mt-2">
+                                            <div
+                                                className="px-2 py-1 text-cyan-500 bg-white rounded border border-cyan-500 border-solid">
+                                                Last Serviced: 2023-08-30
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex flex-col gap-3 p-3 bg-white rounded">
-                            <div className="text-sm font-bold leading-5 text-zinc-900">Printer B</div>
-                            <div>Status: Out of Ink</div>
-                            <div>Location: 1st Floor</div>
-                            <div className="flex justify-center">
-                                <div
-                                    className="px-2 py-1 text-cyan-500 bg-white rounded border border-cyan-500 border-solid">
-                                    Last Serviced: 2023-08-30
+
+                    )
+                    : (
+                        <div className="flex flex-col gap-6 text-center">
+                            <div className="text-sm font-bold leading-5 text-zinc-900">Department: [Department Name]</div>
+                            <div className="text-sm leading-5">Last Refresh: [Date and Time]</div>
+                            <div className="overflow-x-auto">
+                                <div className="flex gap-4">
+                                    <div className="flex-shrink-0 w-70 p-4 bg-gray-200 rounded-lg shadow-md">
+                                        <div className="text-sm font-bold leading-5 text-zinc-900">Printer 1</div>
+                                        <div>Status: Operational</div>
+                                        <div>Location: 2nd Floor</div>
+                                        <div className="flex justify-center mt-2">
+                                            <div
+                                                className="px-2 py-1 text-cyan-500 bg-white rounded border border-cyan-500 border-solid">
+                                                Last Serviced: 2023-09-15
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex-shrink-0 w-70 p-4 bg-gray-200 rounded-lg shadow-md">
+                                        <div className="text-sm font-bold leading-5 text-zinc-900">Printer 2</div>
+                                        <div>Status: Out of Ink</div>
+                                        <div>Location: 1st Floor</div>
+                                        <div className="flex justify-center mt-2">
+                                            <div
+                                                className="px-2 py-1 text-cyan-500 bg-white rounded border border-cyan-500 border-solid">
+                                                Last Serviced: 2023-08-30
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    )}
             </div>
         </div>
     );
