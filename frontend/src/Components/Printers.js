@@ -1,10 +1,10 @@
 import * as React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import printer from "../Assets/printer.png";
 import settingsIcon from "../Assets/setting.png";
 import Swal from 'sweetalert2';
-import { motion } from "framer-motion";
-import { FiMenu } from "react-icons/fi";
+import {motion} from "framer-motion";
+import {FiMenu} from "react-icons/fi";
 
 const INITIAL_PRINTERS = [
     {
@@ -32,9 +32,12 @@ const INITIAL_PRINTERS = [
 ];
 
 function Printers() {
-    const [printers, setPrinters] = React.useState(INITIAL_PRINTERS);
-    const [activePrinter, setActivePrinter] = React.useState(null);
-    const [open, setOpen] = React.useState(false);
+    const [printers,
+        setPrinters] = React.useState(INITIAL_PRINTERS);
+    const [activePrinter,
+        setActivePrinter] = React.useState(null);
+    const [open,
+        setOpen] = React.useState(false);
     const dropdownRef = React.useRef(null); // Ref for dropdown menu
     const navigate = useNavigate(); // Hook to navigate programmatically
 
@@ -80,18 +83,18 @@ function Printers() {
 
         Swal
             .fire({
-                title: 'Are you sure you want to logout?',
-                text: "You will be redirected to the login page.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Logout',
-                cancelButtonText: 'Cancel',
-                customClass: {
-                    container: 'swal2-container',
-                    popup: 'swal2-popup',
-                    button: 'swal2-button'
-                }
-            })
+            title: 'Are you sure you want to logout?',
+            text: "You will be redirected to the login page.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Logout',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                container: 'swal2-container',
+                popup: 'swal2-popup',
+                button: 'swal2-button'
+            }
+        })
             .then((result) => {
                 if (result.isConfirmed) {
                     // Proceed with logout logic (e.g., clear session, redirect to login page)
@@ -142,11 +145,11 @@ function Printers() {
                     .getElementById('critical-ink-input')
                     .value;
 
-                return { name, location, criticalInkLevel };
+                return {name, location, criticalInkLevel};
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                const { name, location, criticalInkLevel } = result.value;
+                const {name, location, criticalInkLevel} = result.value;
                 setPrinters(printers.map(printer => printer.id === printerId
                     ? {
                         ...printer,
@@ -229,35 +232,35 @@ function Printers() {
                         loading="lazy"
                         src={printer}
                         className="shrink-0 self-start aspect-square w-6"
-                        alt="Logo" />
+                        alt="Logo"/>
                     <div>Printer System</div>
                 </div>
                 <div className="flex items-center">
                     <motion.div
                         animate={open
-                            ? "open"
-                            : "closed"}
+                        ? "open"
+                        : "closed"}
                         className="relative z-10"
                         ref={dropdownRef}>
                         <button
                             onClick={() => setOpen((pv) => !pv)}
                             className="flex items-center justify-center p-2 rounded-md text-zinc-900 bg-zinc-300 hover:bg-zinc-400 transition-colors">
-                            <FiMenu className="text-xl" />
+                            <FiMenu className="text-xl"/>
                         </button>
 
                         <motion.ul
                             initial={wrapperVariants.closed}
                             animate={open
-                                ? "open"
-                                : "closed"}
+                            ? "open"
+                            : "closed"}
                             variants={wrapperVariants}
                             style={{
-                                originY: "top",
-                                translateX: "-50%"
-                            }}
+                            originY: "top",
+                            translateX: "-50%"
+                        }}
                             className={`flex flex-col gap-2 p-2 rounded-lg bg-white shadow-xl absolute top-[120%] left-[50%] w-48 overflow-hidden z-20 ${open
-                                ? ''
-                                : 'hidden'}`}>
+                            ? ''
+                            : 'hidden'}`}>
                             <li
                                 className="flex items-center gap-2 w-full p-2 text-xs font-medium whitespace-nowrap rounded-md hover:bg-zinc-100 text-slate-700 hover:text-zinc-900 transition-colors cursor-pointer">
                                 <Link to="/mainpage" className="w-full">🏠 Home</Link>
@@ -281,18 +284,18 @@ function Printers() {
             </nav>
 
             {/* Printer components */}
-            <div className="flex flex-col items-center mt-7 space-y-4 flex-1 px-4 sm:px-8">
-                {printers.map((printer) => (
-                    <div
-                        key={printer.id}
-                        className="relative bg-gray-200 w-full max-w-lg rounded-lg shadow-lg">
-                        <div className="p-5">
+            <div
+                className="flex flex-col items-center mt-7 space-y-4 flex-1 px-4 sm:px-6 lg:px-8">
+                <div
+                    className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 w-full max-w-6xl">
+                    {printers.map((printer) => (
+                        <div key={printer.id} className="bg-gray-200 rounded-lg shadow-lg p-5">
                             <div className="flex items-center justify-between">
                                 <div className="text-xl font-bold text-zinc-900">{printer.name}</div>
                                 <button
                                     onClick={() => handleSettingsClick(printer.id)}
                                     className="text-gray-500 hover:text-gray-900 focus:outline-none">
-                                    <img loading="lazy" src={settingsIcon} className="h-6 w-6" alt="Settings" />
+                                    <img loading="lazy" src={settingsIcon} className="h-6 w-6" alt="Settings"/>
                                 </button>
                             </div>
                             <div className="mt-3 text-base">Status: {printer.status}</div>
@@ -300,9 +303,10 @@ function Printers() {
                             <div className="mt-1.5 text-xs">IP: {printer.ip}</div>
                             <div className="mt-4 text-sm font-bold">Ink Level: {printer.inkLevel}</div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
+
         </div>
     );
 }
