@@ -40,7 +40,7 @@ function ResponsiveLogin() {
                             placeholder="Password"/>
                     </div>
                     <div
-                        className="mt-2 text-right text-sm leading-5 text-cyan-500 font-bold md:text-right">
+                        className="mt-2 text-right text-sm leading-5 text-blue-700 font-bold md:text-right">
                         Forgot Password?
                     </div>
                 </div>
