@@ -11,22 +11,6 @@ const PORT = process.env.PORT || 3001;
 // Middleware to parse JSON requests
 app.use(express.json());
 
-// Connect to the database and define the routes
-connectToDatabase()
-    .then(db => {
-        const routes = defineRoutes(db, sendLineNotify);
-        app.use('/api', routes);
-
-        // Start the server
-        app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
-    })
-    .catch(err => {
-        console.error('Database connection error:', err);
-        process.exit(1);
-    });
-
 
 // LINE Notify token
 const LINE_NOTIFY_TOKEN = "HjvhE48RR4VVGh1kJwxDcne4DbpeEBV0srAH2OaH5Jz";

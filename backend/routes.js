@@ -4,10 +4,11 @@ const express = require("express");
 const { getPool } = require("./config/dbCon");
 
 // * ======= seq connect ================
-const seqCon = require("./database/apiQuery");
+const seqCon = require("./database/apiQuery.js");
 
 // * ====== mssql type 2 =========
 const mssqlCon2 = require("./database/apiQueryMssql");
+
 
 // const defineRoutes = (sendLineNotify) => {
 const router = express.Router();
@@ -66,6 +67,16 @@ router.get("/department_seq", async (req, res) => {
     res.status(400).json({ status: false, errMsg: "Database query error" });
   }
 });
+
+router.get("/toner_seq", async (req, res) => {
+    try {
+      const [result, rowEffect] = await seqCon.Toner_Level();
+      res.json({ status: true, data: result }); // Send the query result as JSON response
+    } catch (err) {
+      console.error("Database query error:", err);
+      res.status(400).json({ status: false, errMsg: "Database query error" });
+    }
+  });
 
 
 router.get("/department_mssql2", async (req, res) => {
