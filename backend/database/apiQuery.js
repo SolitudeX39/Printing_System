@@ -1,8 +1,9 @@
 const { sequelize_train } = require("../config/dbConSeque");
+const snmp = require('net-snmp');
 
 const api_get_all_list_prt = () => {
     return sequelize_train.query(`
-    SELECT TOP (1000) [PRT_DIGIT]
+    SELECT TOP (15) [PRT_DIGIT]
         ,[PRT_FLOOR]
         ,[PRT_IP]
         ,[PRT_PRINTLO]
@@ -48,8 +49,48 @@ const api_get_printer_by_ip = (prt_ip) => {
     });
 }
 
+
+const performSnmpGetWithRetry = async (printer, maxRetries = 3) => {
+    let attempt = 0;
+    let success = false;
+
+    while (attempt < maxRetries && !success) {
+        try {
+            const session = snmp.createSession(printer.PRT_IP, "public");
+            const oids = ["1.3.6.1.2.1.43.11.1.1.9.1.1"];
+
+            await new Promise((resolve, reject) => {
+                session.get(oids, function (error, varbinds) {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        for (let i = 0; i < varbinds.length; i++) {
+                            if (snmp.isVarbindError(varbinds[i])) {
+                                reject(snmp.varbindError(varbinds[i]));
+                            } else {
+                                console.log(`Printer ${printer.PRT_IP} - OID ${varbinds[i].oid} = ${varbinds[i].value}`);
+                                success = true;
+                            }
+                        }
+                    }
+                    session.close();
+                    resolve();
+                });
+            });
+
+        } catch (error) {
+            console.error(`Error fetching SNMP data for printer ${printer.PRT_IP} (attempt ${attempt + 1}):`, error);
+            attempt++;
+            if (attempt >= maxRetries) {
+                // console.error(`Failed to fetch SNMP data for printer ${printer.PRT_IP} after ${maxRetries} attempts.`);
+            }
+        }
+    }
+};
+
 module.exports = {
     api_get_all_list_prt,
     Toner_Level,
-    api_get_printer_by_ip // Export the new function
+    api_get_printer_by_ip,
+    performSnmpGetWithRetry
 }
