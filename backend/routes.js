@@ -1,15 +1,6 @@
 const express = require("express");
-
-// * ======= mssql connect pool =========
-const { getPool } = require("./config/dbCon");
-
 // * ======= seq connect ================
 const seqCon = require("./database/apiQuery.js");
-
-// * ====== mssql type 2 =========
-const mssqlCon2 = require("./database/apiQueryMssql");
-
-
 // const defineRoutes = (sendLineNotify) => {
 const router = express.Router();
 
@@ -79,15 +70,23 @@ router.get("/toner_seq", async (req, res) => {
   });
 
 
-router.get("/department_mssql2", async (req, res) => {
+router.get('/api/printer-by-ip', async (req, res) => {
+  const { prt_ip } = req.body;
+
+  if (!prt_ip) {
+      return res.status(400).send('PRT_IP is required');
+  }
+
   try {
-    const result = await mssqlCon2.api_get_all_list_prt();
-    res.json({ status: true, data: result.recordset }); // Send the query result as JSON response
-  } catch (err) {
-    console.error("Database query error:", err);
-    res.status(400).json({ status: false, errMsg: "Database query error" });
+      const data = await seqCon.api_get_printer_by_ip(prt_ip);
+      res.json(data);
+  } catch (error) {
+      console.error('Error fetching printer data by IP:', error);
+      res.status(500).send('Internal Server Error');
   }
 });
+
+
 
 // Route to send LINE Notify
 router.post("/notify", (req, res) => {
