@@ -4,8 +4,7 @@ import {Link, useNavigate} from "react-router-dom";
 import printer from "../Assets/printer.png";
 import {motion} from "framer-motion";
 import {FiMenu} from "react-icons/fi";
-import {PrinterContext} from "./PrinterContext";
-import {useMediaQuery} from 'react-responsive';
+import {PrinterContext} from "./PrinterContext"; // Import context
 
 function Printers() {
     const {printers, setPrinters} = useContext(PrinterContext);
@@ -17,7 +16,6 @@ function Printers() {
         setOpen] = useState(false);
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
-    const isDesktop = useMediaQuery({query: '(min-width: 768px)'});
 
     const handleEditClick = (index) => {
         setIsEditing(index);
@@ -153,27 +151,13 @@ function Printers() {
                 </div>
             </nav>
 
-            {/* Printers List */}
             <div className="flex flex-col p-6 space-y-6 bg-white">
                 <div className="text-xl font-bold leading-8 text-center">Printers</div>
-                <div
-                    className={`flex ${isDesktop
-                    ? 'flex-row flex-wrap gap-4'
-                    : 'flex-col space-y-4'}`}
-                    style={{
-                    overflowX: isDesktop
-                        ? 'auto'
-                        : 'visible'
-                }}>
+                <div className="flex flex-col space-y-4">
                     {printers.map((printer, index) => (
                         <div
                             key={index}
-                            className="flex flex-col p-4 border border-gray-300 rounded-lg shadow-md flex-shrink-0"
-                            style={{
-                            width: isDesktop
-                                ? '300px'
-                                : 'auto'
-                        }}>
+                            className="flex flex-col p-4 border border-gray-300 rounded-lg shadow-md">
                             <div className="flex items-center gap-2">
                                 <img src={printer.image || printer} alt="Printer" className="w-12 h-12"/>
                                 <div className="flex flex-col">

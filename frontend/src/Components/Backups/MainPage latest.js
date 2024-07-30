@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from "react";
+import React, {useState, useRef, useEffect, useContext} from "react";
 import {Link, useNavigate} from "react-router-dom";
 import {useMediaQuery} from 'react-responsive';
 import printer from "../Assets/printer.png";
@@ -7,6 +7,7 @@ import sort from "../Assets/sort.png";
 import {motion} from "framer-motion";
 import {FiMenu} from "react-icons/fi";
 import Swal from 'sweetalert2';
+import {PrinterContext} from "./PrinterContext";
 
 // Define animation variants
 const wrapperVariants = {
@@ -27,16 +28,29 @@ const wrapperVariants = {
 };
 
 function MainPage() {
+    const {printers, setPrinters} = useContext(PrinterContext);
     const [open,
         setOpen] = useState(false);
+    const [sortOpen,
+        setSortOpen] = useState(false);
+    const [selectedSort,
+        setSelectedSort] = useState("Sort By");
+    const [isAdding,
+        setIsAdding] = useState(false);
+    const [newPrinter,
+        setNewPrinter] = useState({name: "", status: "", location: "", lastServiced: ""});
     const navigate = useNavigate();
     const isDesktop = useMediaQuery({query: '(min-width: 768px)'});
     const dropdownRef = useRef(null);
+    const sortDropdownRef = useRef(null);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setOpen(false);
+            }
+            if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target)) {
+                setSortOpen(false);
             }
         };
 
@@ -80,6 +94,20 @@ function MainPage() {
             });
     };
 
+    const handleSortOptionClick = (option) => {
+        setSelectedSort(option);
+        setSortOpen(false);
+    };
+
+    const handleAddPrinter = () => {
+        setPrinters([
+            ...printers,
+            newPrinter
+        ]);
+        setNewPrinter({name: "", status: "", location: "", lastServiced: ""});
+        setIsAdding(false);
+    };
+
     return (
         <div className="flex flex-col w-full bg-white">
             {/* Navbar */}
@@ -101,7 +129,7 @@ function MainPage() {
                         className="relative z-10"
                         ref={dropdownRef}>
                         <button
-                            onClick={() => setOpen((prev) => !prev)}
+                            onClick={() => setOpen(prev => !prev)}
                             className="flex items-center justify-center p-2 rounded-md text-zinc-900 bg-zinc-300 hover:bg-zinc-400 transition-colors">
                             <FiMenu className="text-xl"/>
                         </button>
@@ -174,101 +202,127 @@ function MainPage() {
                     <div className="flex items-center gap-3 sm:gap-5">
                         <div
                             className="flex items-center gap-1.5 px-3 py-2.5 text-white bg-cyan-500 rounded-md">
-                            <img
-                                loading="lazy"
-                                src={refresh}
-                                className="shrink-0 w-4 aspect-square"
-                                alt="Refresh"/>
-                            <button className="my-auto">Refresh</button>
+                            <img loading="lazy" src={refresh} className="w-5 h-5" alt="Refresh"/>
+                            <span>Refresh</span>
                         </div>
-                        <div
-                            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded border border-solid bg-black bg-opacity-0 border-neutral-300 text-zinc-900">
-                            <img
-                                loading="lazy"
-                                src={sort}
-                                className="shrink-0 w-4 aspect-square"
-                                alt="Sort"/>
-                            <select className="flex-auto outline-none bg-transparent text-sm leading-5">
-                                <option value="option1">Sort By Option 1</option>
-                                <option value="option2">Sort By Option 2</option>
-                                <option value="option3">Sort By Option 3</option>
-                            </select>
-                        </div>
+                        <motion.div
+                            animate={sortOpen
+                            ? "open"
+                            : "closed"}
+                            className="relative"
+                            ref={sortDropdownRef}>
+                            <button
+                                onClick={() => setSortOpen(prev => !prev)}
+                                className="flex items-center gap-1.5 px-3 py-2.5 text-white bg-sky-500 rounded-md">
+                                <img loading="lazy" src={sort} className="w-5 h-5" alt="Sort"/>
+                                <span>{selectedSort}</span>
+                            </button>
+                            <motion.ul
+                                initial={wrapperVariants.closed}
+                                animate={sortOpen
+                                ? "open"
+                                : "closed"}
+                                variants={wrapperVariants}
+                                style={{
+                                originY: "top",
+                                translateX: "-50%"
+                            }}
+                                className={`flex flex-col gap-2 p-2 rounded-lg bg-white shadow-xl absolute top-[120%] left-[50%] w-40 overflow-hidden ${sortOpen
+                                ? ''
+                                : 'hidden'}`}>
+                                <li
+                                    onClick={() => handleSortOptionClick('Name')}
+                                    className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-200 cursor-pointer">Name</li>
+                                <li
+                                    onClick={() => handleSortOptionClick('Status')}
+                                    className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-200 cursor-pointer">Status</li>
+                                <li
+                                    onClick={() => handleSortOptionClick('Location')}
+                                    className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-200 cursor-pointer">Location</li>
+                                <li
+                                    onClick={() => handleSortOptionClick('Last Serviced')}
+                                    className="px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-200 cursor-pointer">Last Serviced</li>
+                            </motion.ul>
+                        </motion.div>
                     </div>
                 </div>
 
-                {/* Printer Status */}
-                {isDesktop
-                    ? (
-                        <div className="flex flex-col gap-6 text-center">
-                            <div className="text-sm font-bold leading-5 text-zinc-900">Department: [Department Name]</div>
-                            <div className="text-sm leading-5">Last Refresh: [Date and Time]</div>
-
-                            {/* Container for Horizontal Scrolling */}
-                            <div className="overflow-x-auto">
-                                <div className="flex flex-nowrap items-center justify-center space-x-4">
-                                    {/* Printer Card 1 */}
-                                    <div className="flex-shrink-0 w-70 p-4 bg-gray-200 rounded-lg shadow-md">
-                                        <div className="text-sm font-bold leading-5 text-zinc-900">Printer 1</div>
-                                        <div>Status: Operational</div>
-                                        <div>Location: 2nd Floor</div>
-                                        <div className="flex justify-center mt-2">
-                                            <div
-                                                className="px-2 py-1 text-cyan-500 bg-white rounded border border-cyan-500 border-solid">
-                                                Last Serviced: 2023-09-15
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Printer Card 2 */}
-                                    <div className="flex-shrink-0 w-70 p-4 bg-gray-200 rounded-lg shadow-md">
-                                        <div className="text-sm font-bold leading-5 text-zinc-900">Printer 2</div>
-                                        <div>Status: Out of Ink</div>
-                                        <div>Location: 1st Floor</div>
-                                        <div className="flex justify-center mt-2">
-                                            <div
-                                                className="px-2 py-1 text-cyan-500 bg-white rounded border border-cyan-500 border-solid">
-                                                Last Serviced: 2023-08-30
-                                            </div>
-                                        </div>
-                                    </div>
+                {/* Printer Cards */}
+                <div className="flex overflow-x-auto py-4 gap-6">
+                    {printers.map((printer, index) => (
+                        <div
+                            key={index}
+                            className="flex-none w-80 p-4 border border-gray-300 rounded-lg shadow-md">
+                            <div className="flex items-center gap-2">
+                                <img src={printer.image || printer} alt="Printer" className="w-12 h-12"/>
+                                <div className="flex flex-col">
+                                    <div className="text-lg font-bold">{printer.name}</div>
+                                    <div>Status: {printer.status}</div>
+                                    <div>Location: {printer.location}</div>
+                                    <div>Last Serviced: {printer.lastServiced}</div>
                                 </div>
                             </div>
                         </div>
+                    ))}
+                </div>
 
-                    )
-                    : (
-                        <div className="flex flex-col gap-6 text-center">
-                            <div className="text-sm font-bold leading-5 text-zinc-900">Department: [Department Name]</div>
-                            <div className="text-sm leading-5">Last Refresh: [Date and Time]</div>
-                            <div className="overflow-x-auto">
-                                <div className="flex gap-4">
-                                    <div className="flex-shrink-0 w-70 p-4 bg-gray-200 rounded-lg shadow-md">
-                                        <div className="text-sm font-bold leading-5 text-zinc-900">Printer 1</div>
-                                        <div>Status: Operational</div>
-                                        <div>Location: 2nd Floor</div>
-                                        <div className="flex justify-center mt-2">
-                                            <div
-                                                className="px-2 py-1 text-cyan-500 bg-white rounded border border-cyan-500 border-solid">
-                                                Last Serviced: 2023-09-15
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex-shrink-0 w-70 p-4 bg-gray-200 rounded-lg shadow-md">
-                                        <div className="text-sm font-bold leading-5 text-zinc-900">Printer 2</div>
-                                        <div>Status: Out of Ink</div>
-                                        <div>Location: 1st Floor</div>
-                                        <div className="flex justify-center mt-2">
-                                            <div
-                                                className="px-2 py-1 text-cyan-500 bg-white rounded border border-cyan-500 border-solid">
-                                                Last Serviced: 2023-08-30
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                {/* Add Printer */}
+                {isAdding && (
+                    <div
+                        className="flex flex-col gap-2 p-4 border border-gray-300 rounded-lg shadow-md">
+                        <input
+                            type="text"
+                            name="name"
+                            value={newPrinter.name}
+                            onChange={(e) => setNewPrinter({
+                            ...newPrinter,
+                            name: e.target.value
+                        })}
+                            placeholder="Name"
+                            className="px-3 py-2 border border-gray-300 rounded-md"/>
+                        <input
+                            type="text"
+                            name="status"
+                            value={newPrinter.status}
+                            onChange={(e) => setNewPrinter({
+                            ...newPrinter,
+                            status: e.target.value
+                        })}
+                            placeholder="Status"
+                            className="px-3 py-2 border border-gray-300 rounded-md"/>
+                        <input
+                            type="text"
+                            name="location"
+                            value={newPrinter.location}
+                            onChange={(e) => setNewPrinter({
+                            ...newPrinter,
+                            location: e.target.value
+                        })}
+                            placeholder="Location"
+                            className="px-3 py-2 border border-gray-300 rounded-md"/>
+                        <input
+                            type="date"
+                            name="lastServiced"
+                            value={newPrinter.lastServiced}
+                            onChange={(e) => setNewPrinter({
+                            ...newPrinter,
+                            lastServiced: e.target.value
+                        })}
+                            className="px-3 py-2 border border-gray-300 rounded-md"/>
+                        <button
+                            onClick={handleAddPrinter}
+                            className="px-4 py-2.5 text-white bg-green-500 rounded-md">
+                            Add Printer
+                        </button>
+                    </div>
+                )}
+                <button
+                    onClick={() => setIsAdding(prev => !prev)}
+                    className="px-4 py-2.5 text-white bg-blue-500 rounded-md">
+                    {isAdding
+                        ? 'Cancel'
+                        : 'Add New Printer'}
+                </button>
             </div>
         </div>
     );
