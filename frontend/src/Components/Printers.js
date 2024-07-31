@@ -1,7 +1,8 @@
 import React, {useState, useContext, useRef, useEffect} from "react";
 import Swal from 'sweetalert2';
 import {Link, useNavigate} from "react-router-dom";
-import printer from "../Assets/printer.png";
+import printerIcon from "../Assets/printer.png";
+import printerIcon2 from "../Assets/printer 2.png"
 import {motion} from "framer-motion";
 import {FiMenu} from "react-icons/fi";
 import {PrinterContext} from "./PrinterContext";
@@ -61,6 +62,24 @@ function Printers() {
             });
     };
 
+    const handleDeleteAllClick = () => {
+        Swal
+            .fire({
+            title: 'Are you sure?',
+            text: "This will delete all printers and cannot be undone!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete all!',
+            cancelButtonText: 'No, cancel!'
+        })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    setPrinters([]);
+                    Swal.fire('Deleted!', 'All printers have been deleted.', 'success');
+                }
+            });
+    };
+
     const handleLogout = () => {
         Swal
             .fire({
@@ -100,7 +119,7 @@ function Printers() {
                     className="flex items-center gap-1.5 text-xl font-bold leading-8 text-zinc-900">
                     <img
                         loading="lazy"
-                        src={printer}
+                        src={printerIcon}
                         className="shrink-0 self-start aspect-square w-6"
                         alt="Logo"/>
                     <div>Printer System</div>
@@ -156,6 +175,13 @@ function Printers() {
             {/* Printers List */}
             <div className="flex flex-col p-6 space-y-6 bg-white">
                 <div className="text-xl font-bold leading-8 text-center">Printers</div>
+                <div className="flex justify-end mb-4">
+                    <button
+                        onClick={handleDeleteAllClick}
+                        className="px-4 py-2.5 text-white bg-red-500 rounded-md">
+                        Delete All
+                    </button>
+                </div>
                 <div
                     className={`flex ${isDesktop
                     ? 'flex-row flex-wrap gap-4'
@@ -175,12 +201,12 @@ function Printers() {
                                 : 'auto'
                         }}>
                             <div className="flex items-center gap-2">
-                                <img src={printer.image || printer} alt="Printer" className="w-12 h-12"/>
+                                <img src={printer.image || printerIcon2} alt="Printer" className="w-12 h-12"/>
                                 <div className="flex flex-col">
                                     <div className="text-lg font-bold">{printer.name}</div>
                                     <div>Status: {printer.status}</div>
                                     <div>Location: {printer.location}</div>
-                                    <div>Last Serviced: {printer.lastServiced}</div>
+                                    <div>Last Serviced: </div>
                                 </div>
                             </div>
                             {isEditing === index

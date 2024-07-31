@@ -1,16 +1,16 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, {createContext, useState, useEffect} from 'react';
 
 // Create Context
 export const PrinterContext = createContext();
 
 // Create Context Provider
-export const PrinterProvider = ({ children }) => {
-    const [printers, setPrinters] = useState([]);
+export const PrinterProvider = ({children}) => {
+    const [printers,
+        setPrinters] = useState(() => {
 
-    useEffect(() => {
-        // Load printers from localStorage when the component mounts
         const savedPrinters = JSON.parse(localStorage.getItem('printers')) || [];
-        setPrinters(savedPrinters);
+        console.log("Loaded from local storage:", savedPrinters)
+        return savedPrinters;
     }, []);
 
     useEffect(() => {
@@ -19,7 +19,11 @@ export const PrinterProvider = ({ children }) => {
     }, [printers]);
 
     return (
-        <PrinterContext.Provider value={{ printers, setPrinters }}>
+        <PrinterContext.Provider
+            value={{
+            printers,
+            setPrinters
+        }}>
             {children}
         </PrinterContext.Provider>
     );

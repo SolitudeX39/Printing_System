@@ -1,13 +1,16 @@
 import React, {useState, useRef, useEffect, useContext} from "react";
 import {Link, useNavigate} from "react-router-dom";
 import {useMediaQuery} from 'react-responsive';
-import printer from "../Assets/printer.png";
+import printerIcon from "../Assets/printer.png";
+import printerIcon2 from "../Assets/printer 2.png";
 import refresh from "../Assets/refresh.png";
 import sort from "../Assets/sort.png";
 import {motion} from "framer-motion";
 import {FiMenu} from "react-icons/fi";
 import Swal from 'sweetalert2';
 import {PrinterContext} from "./PrinterContext";
+import endpoint_config from "../env/endpoint";
+import axios from 'axios';
 
 // Define animation variants
 const wrapperVariants = {
@@ -43,6 +46,50 @@ function MainPage() {
     const isDesktop = useMediaQuery({query: '(min-width: 768px)'});
     const dropdownRef = useRef(null);
     const sortDropdownRef = useRef(null);
+    const [error,
+        setError] = useState(null);
+    const [prt_ip,
+        setPrt_ip] = useState('');
+    const [inputPrtIp,
+        setInputPrtIp] = useState('');
+
+    useEffect(() => {
+        const fetchPrinters = async() => {
+            try {
+                // Adjust the API endpoint URL as needed
+                const response = await axios.get(`${endpoint_config.api_url}/api/printer-by-ip`);
+                setPrinters(response.data);
+            } catch (error) {
+                console.error('Error fetching printers:', error);
+                setError('Failed to fetch printers.');
+            }
+        };
+
+        fetchPrinters();
+    }, [endpoint_config.api_url, setPrinters]);
+
+    // Handle fetching printer data by IP
+    const fetchPrinterByIP = async(prt_ip) => {
+        try {
+            const response = await axios.get(`${endpoint_config.api_url}/api/printer-by-ip`, {
+                params: {
+                    prt_ip
+                } // Use params for GET request query parameters
+            });
+            console.log('Printer data:', response.data);
+            // Handle the fetched printer data
+        } catch (error) {
+            console.error('Error fetching printer by IP:', error);
+            setError('Failed to fetch printer by IP.');
+        }
+    };
+
+    // Fetch printer data by IP when prt_ip changes
+    useEffect(() => {
+        if (prt_ip) {
+            fetchPrinterByIP(prt_ip);
+        }
+    }, [prt_ip]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -99,13 +146,20 @@ function MainPage() {
         setSortOpen(false);
     };
 
-    const handleAddPrinter = () => {
-        setPrinters([
-            ...printers,
-            newPrinter
-        ]);
-        setNewPrinter({name: "", status: "", location: "", lastServiced: ""});
-        setIsAdding(false);
+    const handleAddPrinter = async() => {
+        try {
+            const response = await axios.post(`${endpoint_config.api_url}/api/add-printer`, newPrinter);
+            console.log('New printer added:', response.data);
+            setPrinters([
+                ...printers,
+                response.data
+            ]);
+            setNewPrinter({name: "", status: "", location: "", lastServiced: "", ip: ""});
+            setIsAdding(false);
+        } catch (error) {
+            console.error('Error adding new printer:', error);
+            setError('Failed to add new printer.');
+        }
     };
 
     return (
@@ -116,7 +170,7 @@ function MainPage() {
                     className="flex items-center gap-1.5 text-xl font-bold leading-8 text-zinc-900">
                     <img
                         loading="lazy"
-                        src={printer}
+                        src={printerIcon}
                         className="shrink-0 w-6 aspect-square"
                         alt="Logo"/>
                     <div>Printer System</div>
@@ -193,8 +247,8 @@ function MainPage() {
                             ? "500px"
                             : "100%"
                     }}
-                        className="py-3 bg-white rounded border border-solid border-neutral-300 text-zinc-900 px-3"
-                        placeholder="Input text"/>
+                        className="p-2 border border-gray-300 rounded"
+                        placeholder="Enter printer details"/>
                 </div>
 
                 {/* Refresh and Sort */}
@@ -254,7 +308,7 @@ function MainPage() {
                             key={index}
                             className="flex-none w-80 p-4 border border-gray-300 rounded-lg shadow-md">
                             <div className="flex items-center gap-2">
-                                <img src={printer.image || printer} alt="Printer" className="w-12 h-12"/>
+                                <img src={printer.image || printerIcon2} alt="Printer" className="w-12 h-12"/>
                                 <div className="flex flex-col">
                                     <div className="text-lg font-bold">{printer.name}</div>
                                     <div>Status: {printer.status}</div>
@@ -266,68 +320,76 @@ function MainPage() {
                     ))}
                 </div>
 
-                {/* Add Printer */}
-                {isAdding && (
-                    <div className="flex justify-center">
-                        <div
-                            className="flex flex-col gap-2 p-4 border border-gray-300 rounded-lg shadow-md w-full sm:w-auto sm:max-w-[500px]">
-                            <input
-                                type="text"
-                                name="name"
-                                value={newPrinter.name}
-                                onChange={(e) => setNewPrinter({
-                                ...newPrinter,
-                                name: e.target.value
-                            })}
-                                placeholder="Name"
-                                className="px-3 py-2 border border-gray-300 rounded-md"/>
-                            <input
-                                type="text"
-                                name="status"
-                                value={newPrinter.status}
-                                onChange={(e) => setNewPrinter({
-                                ...newPrinter,
-                                status: e.target.value
-                            })}
-                                placeholder="Status"
-                                className="px-3 py-2 border border-gray-300 rounded-md"/>
-                            <input
-                                type="text"
-                                name="location"
-                                value={newPrinter.location}
-                                onChange={(e) => setNewPrinter({
-                                ...newPrinter,
-                                location: e.target.value
-                            })}
-                                placeholder="Location"
-                                className="px-3 py-2 border border-gray-300 rounded-md"/>
-                            <input
-                                type="date"
-                                name="lastServiced"
-                                value={newPrinter.lastServiced}
-                                onChange={(e) => setNewPrinter({
-                                ...newPrinter,
-                                lastServiced: e.target.value
-                            })}
-                                className="px-3 py-2 border border-gray-300 rounded-md"/>
-                            <button
-                                onClick={handleAddPrinter}
-                                className="px-4 py-2.5 text-white bg-green-500 rounded-md">
-                                Add Printer
-                            </button>
-                        </div>
-                    </div>
-                )}
-
+                {/* Add Printer Button */}
                 <div className="flex justify-center">
                     <button
-                        onClick={() => setIsAdding(prev => !prev)}
-                        className="px-4 py-2.5 text-white bg-blue-500 rounded-md w-full sm:w-auto sm:max-w-[200px]">
+                        onClick={() => setIsAdding(!isAdding)}
+                        className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors">
                         {isAdding
-                            ? 'Cancel'
-                            : 'Add New Printer'}
+                            ? "Cancel"
+                            : "Add New Printer"}
                     </button>
                 </div>
+
+                {isAdding && (
+                    <div className="flex flex-col items-center space-y-4">
+                        <input
+                            type="text"
+                            value={newPrinter.name}
+                            onChange={(e) => setNewPrinter({
+                            ...newPrinter,
+                            name: e.target.value
+                        })}
+                            placeholder="Printer Name"
+                            className="p-2 border border-gray-300 rounded"/>
+                        <input
+                            type="text"
+                            value={newPrinter.status}
+                            onChange={(e) => setNewPrinter({
+                            ...newPrinter,
+                            status: e.target.value
+                        })}
+                            placeholder="Status"
+                            className="p-2 border border-gray-300 rounded"/>
+                        <input
+                            type="text"
+                            value={newPrinter.location}
+                            onChange={(e) => setNewPrinter({
+                            ...newPrinter,
+                            location: e.target.value
+                        })}
+                            placeholder="Location"
+                            className="p-2 border border-gray-300 rounded"/>
+                        <input
+                            type="text"
+                            value={newPrinter.lastServiced}
+                            onChange={(e) => setNewPrinter({
+                            ...newPrinter,
+                            lastServiced: e.target.value
+                        })}
+                            placeholder="Last Serviced"
+                            className="p-2 border border-gray-300 rounded"/>
+                        <input
+                            type="text"
+                            value={inputPrtIp}
+                            onChange={(e) => setInputPrtIp(e.target.value)}
+                            className="p-2 border border-gray-300 rounded"
+                            placeholder="Enter Printer IP"/>
+                        <button
+                            onClick={() => fetchPrinterByIP(inputPrtIp)}
+                            className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors">
+                            Fetch Printer
+                        </button>
+                        <button
+                            onClick={handleAddPrinter}
+                            className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition-colors">
+                            Add Printer
+                        </button>
+                    </div>
+                )}
+                {error && (
+                    <div className="text-red-500">{error}</div>
+                )}
             </div>
         </div>
     );
