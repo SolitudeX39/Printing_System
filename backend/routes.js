@@ -70,8 +70,8 @@ router.get("/toner_seq", async (req, res) => {
   });
 
 
-router.get('/api/printer-by-ip', async (req, res) => {
-  const { prt_ip } = req.body;
+router.get('/printer-by-ip', async (req, res) => {
+  const { prt_ip } = req.query;
 
   if (!prt_ip) {
       return res.status(400).send('PRT_IP is required');
